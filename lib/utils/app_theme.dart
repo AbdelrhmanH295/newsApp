@@ -4,16 +4,18 @@ import 'package:news_app/utils/app_styles.dart';
 
 class Apptheme {
   static final ThemeData lightTheme = ThemeData(
-    indicatorColor: AppColors.blackColor,
+      primaryColor: AppColors.whiteColor,
+      indicatorColor: AppColors.blackColor,
       textTheme: TextTheme(
-        labelMedium: AppStyles.semi14black,
+          labelMedium: AppStyles.semi14black,
           labelLarge: AppStyles.bold20black.copyWith(fontSize: 16),
           headlineLarge: AppStyles.bold24black),
       scaffoldBackgroundColor: AppColors.whiteColor,
       appBarTheme: AppBarTheme(color: AppColors.whiteColor));
 
   static final ThemeData darkTheme = ThemeData(
-    indicatorColor: AppColors.whiteColor,
+      primaryColor: AppColors.blackColor,
+      indicatorColor: AppColors.whiteColor,
       textTheme: TextTheme(
           labelLarge: AppStyles.bold24White.copyWith(fontSize: 18),
           headlineLarge: AppStyles.bold24White,

@@ -9,9 +9,9 @@ import 'package:news_app/model/source_response.dart'; // as http refer to when n
 https://newsapi.org/v2/everything?q=bitcoin&apiKey=2b7e78a8883b46ec90cc4cbba6f52100
 */
 class ApiManager {
-  static Future<SourceResponse?> getSources() async {
+  static Future<SourceResponse?> getSources(String categoryId) async {
     Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.sourceApi,
-        {'apiKey': ApiConstants.apiKey});
+        {'apiKey': ApiConstants.apiKey, 'category': categoryId});
     var response = await http.get(url);
     try {
       var responseBody = response.body; //todo: String
@@ -34,6 +34,19 @@ class ApiManager {
       var json =
           jsonDecode(responseBody); //json ... i need to convert it to object
       return NewsResponse.fromJson(json); // we have now obj
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  static Future<NewsResponse?> searchNews(String query) async {
+    Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.newsApi,
+        {'apiKey': ApiConstants.apiKey, 'q': query});
+    var response = await http.get(url);
+    try {
+      var responseBody = response.body;
+      var json = jsonDecode(responseBody);
+      return NewsResponse.fromJson(json);
     } catch (e) {
       throw e;
     }
