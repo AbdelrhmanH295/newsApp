@@ -21,23 +21,42 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isSearching = false;
+  String searchQuery = '';
+  TextEditingController searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Scaffold(
+        padding: const EdgeInsets.all(8.0),
+        child: Scaffold(
           appBar: AppBar(
             title: isSearching
                 ? TextFormField(
+                  style: TextStyle( color: Theme.of(context).indicatorColor),
+                  
+                  cursorColor: Theme.of(context).indicatorColor,
+                    controller: searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value;
+                      });
+                    },
                     decoration: InputDecoration(
                       prefixIcon: Icon(
                         Icons.search,
                         color: Theme.of(context).indicatorColor,
                       ),
-                      hintText: 'Search...',
+                     
+                      hintText: 'Search news...',
                       hintStyle:
                           TextStyle(color: Theme.of(context).indicatorColor),
                       contentPadding:
@@ -55,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     autofocus: true,
                   )
-                :  Text(
+                : Text(
                     selectedCategory == null
                         ? AppLocalizations.of(context)!.home
                         : selectedCategory!.title,
@@ -66,6 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     setState(() {
                       isSearching = !isSearching;
+                      if (!isSearching) {
+                        searchQuery = '';
+                        searchController.clear();
+                      }
                     });
                   },
                   icon: Icon(isSearching ? Icons.close : Icons.search))
@@ -188,15 +211,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          body: Padding(padding: EdgeInsets.only(top: 10),
-          child: selectedCategory == null
-              ? CategoryFragment(
-                  onCategoryItemClick: onCategoryItemClick,
-                )
-              : CategoryDetails(
-                  category: selectedCategory!,
-                )),) 
-    );
+          body: Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: selectedCategory == null
+                  ? CategoryFragment(
+                      onCategoryItemClick: onCategoryItemClick,
+                    )
+                  : CategoryDetails(
+                      category: selectedCategory!,
+                      isSearchActive: isSearching && searchQuery.isNotEmpty,
+                      searchQuery: searchQuery,
+                    )),
+        ));
   }
 
   Category? selectedCategory;
