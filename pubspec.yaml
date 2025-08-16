@@ -44,6 +44,7 @@ dependencies:
   cached_network_image: ^3.4.1
   timeago: ^3.7.1
   provider: ^6.1.5
+  url_launcher: ^6.3.1
 
 
 
