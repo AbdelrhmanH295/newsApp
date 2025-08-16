@@ -42,7 +42,9 @@ class MyApp extends StatelessWidget {
           Locale('ar'), // Arabic
         ],
         initialRoute: AppRoutes.homeScreen,
-        routes: {AppRoutes.homeScreen: (context) => HomeScreen()},
+        routes: {
+          AppRoutes.homeScreen: (context) => HomeScreen(onDrawerItemClick: () { },),
+        },
         locale: Locale(appLanguageProvider.appLanguage),
         theme: Apptheme.lightTheme,
         darkTheme: Apptheme.darkTheme,

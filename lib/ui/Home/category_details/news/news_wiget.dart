@@ -1,19 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/api/api_manager.dart';
+import 'package:news_app/model/category.dart';
 import 'package:news_app/model/news_response.dart';
 import 'package:news_app/model/source_response.dart';
 import 'package:news_app/ui/Home/category_details/news/news_item.dart';
 
 class NewsWiget extends StatelessWidget {
-  Sources source;
-  NewsWiget({super.key, required this.source});
+  Sources? source;
+  bool isSearchActive;
+  String searchQuery;
+
+  NewsWiget({
+    super.key, 
+    this.source,
+    this.isSearchActive = false,
+    this.searchQuery = '',
+  });
 
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+    
+    // If search is active and we have a query, use search API
+    if (isSearchActive && searchQuery.isNotEmpty) {
+      return FutureBuilder<NewsResponse?>(
+        future: ApiManager.searchNews(searchQuery),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Column(
+              children: [
+                Text(
+                  'Something went wrong',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      ApiManager.searchNews(searchQuery);
+                    },
+                    child: Text(
+                      'Try again',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ))
+              ],
+            );
+          }
+          
+          if (snapshot.data?.status != 'ok') {
+            return Column(
+              children: [
+                Text(
+                  snapshot.data!.message!,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      // Refresh search
+                    },
+                    child: Text(
+                      'Try again',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ))
+              ],
+            );
+          }
+          
+          var newsList = snapshot.data?.articles ?? [];
+          if (newsList.isEmpty) {
+            return Center(
+              child: Text(
+                'No news found for "$searchQuery"',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            );
+          }
+          
+          return ListView.separated(
+              itemBuilder: (context, index) {
+                return NewsItem(
+                  news: newsList[index],
+                );
+              },
+              separatorBuilder: (context, index) {
+                return SizedBox(
+                  height: height * 0.02,
+                );
+              },
+              itemCount: newsList.length);
+        },
+      );
+    }
+    
+    // Normal news display for a specific source
+    if (source == null) {
+      return Center(
+        child: Text(
+          'No source selected',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      );
+    }
+    
     return FutureBuilder<NewsResponse?>(
-      future: ApiManager.getNewsBySoorceId(source.id ?? ''),
+      future: ApiManager.getNewsBySoorceId(source!.id ?? ''),
       builder: (context, snapshot) {
         // todo : loading ...
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -28,7 +119,7 @@ class NewsWiget extends StatelessWidget {
               ),
               ElevatedButton(
                   onPressed: () {
-                    ApiManager.getNewsBySoorceId(source.id ?? '');
+                    ApiManager.getNewsBySoorceId(source!.id ?? '');
                   },
                   child: Text(
                     'Try again',
@@ -47,7 +138,7 @@ class NewsWiget extends StatelessWidget {
               ),
               ElevatedButton(
                   onPressed: () {
-                    ApiManager.getSources();
+                    // ApiManager.getSources();
                   },
                   child: Text(
                     'Try again',
