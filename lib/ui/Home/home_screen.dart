@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:news_app/ui/Home/category_details/category_details.dart';
+
+import 'package:news_app/ui/Home/category_details/source_details.dart';
 import 'package:news_app/ui/Home/widgets/Language/language_button.dart';
 import 'package:news_app/ui/Home/widgets/Theme/theme_button.dart';
 import 'package:news_app/ui/Home/widgets/Language/drop_down_Language_container.dart';
