@@ -1,3 +1,4 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,11 +8,13 @@ import 'package:news_app/provider/theme_provider.dart';
 import 'package:news_app/ui/Home/home_screen.dart';
 import 'package:news_app/utils/app_routes.dart';
 import 'package:news_app/utils/app_theme.dart';
+import 'package:news_app/utils/my_bloc_observer.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  Bloc.observer = MyBlocObserver();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
