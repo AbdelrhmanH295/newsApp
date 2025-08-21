@@ -1,23 +1,27 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/api/api_manager.dart';
 import 'package:news_app/model/news_response.dart';
+import 'package:news_app/ui/Home/category_details/news/news_states.dart';
 
-class NewsViewModel extends ChangeNotifier {
-  List<News>? newsList;
-  String? errorMessage;
-  void getNewsBySourceId(String sourceId) async {
-    var response = await ApiManager.getNewsBySoorceId(sourceId);
+class NewsViewModel extends Cubit<NewsStates> {
+  NewsViewModel() : super(NewsLoadingState());
+  void getNewsById(String sourceId) async {
     try {
+      // loading ..
+      emit(NewsLoadingState());
+      var response = await ApiManager.getNewsBySoorceId(sourceId);
       if (response?.status == 'error') {
-        // error => server
-        errorMessage = response!.message!;
-      } else {
-        // success
-        newsList = response!.articles;
+        // error
+        emit(NewsErrorState(errorMessage: response!.message!));
+        return;
+      }
+      if (response?.status == 'ok') {
+        emit(NewsSuccessState(newsList: response!.articles!));
+        return;
       }
     } catch (e) {
-      errorMessage = e.toString();
+      emit(NewsErrorState(errorMessage: e.toString()));
     }
-    notifyListeners();
   }
 }
