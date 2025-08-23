@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/api/api_manager.dart';
 import 'package:news_app/model/source_response.dart';
-import 'package:news_app/ui/Home/category_details/cubit/sources_state.dart';
-import 'package:news_app/ui/Home/category_details/cubit/sources_view_model.dart';
 import 'package:news_app/ui/Home/category_details/source/source_app_widget.dart';
 import 'package:news_app/utils/app_colors.dart';
 
@@ -15,122 +12,72 @@ class CategoryDetails extends StatefulWidget {
 }
 
 class _CategoryDetailsState extends State<CategoryDetails> {
-  SourcesViewModel viewModel = SourcesViewModel();
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    viewModel.getSources();
-  }
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    return BlocProvider<SourcesViewModel>(
-      create: (context) => viewModel,
-      child: BlocBuilder<SourcesViewModel, sourcesState>(
-        builder: (context, state) {
-          if (state is sourceLoadingState) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.greyColor,
+    return FutureBuilder<SourceResponse?>(
+      future: ApiManager.getSources(),
+      builder: (context, snapshot) {
+        //  loading...
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.greyColor,
+            ),
+          );
+        }
+        // error => client
+        else if (snapshot.hasError) {
+          return Column(
+            children: [
+              Text(
+                'Something went wrong',
+                style: Theme.of(context).textTheme.labelMedium,
               ),
-            );
-          } else if (state is sourceErrorState) {
-            return Column(
-              children: [
-                Text(
-                  state.eerorMessage,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                SizedBox(
-                  height: height * 0.03,
-                ),
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.greyColor),
-                    onPressed: () {
-                      viewModel.getSources();
-                      setState(() {});
-                    },
-                    child: Text(
-                      'Try again',
-                      style: TextStyle(color: AppColors.blackColor),
-                    ))
-              ],
-            );
-          } else if (state is sourceSuccessState) {
-            return SourceAppWidget(
-              sourcesList: state.sourcesList,
-            );
-          }
-          return Container();
-        },
-      ),
+              ElevatedButton(
+                  onPressed: () {
+                    ApiManager.getSources();
+                  },
+                  child: Text(
+                    'Try again',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ))
+            ],
+          );
+        }
+        // todo : server => response => success , error
+        // todo : server=>error
+        if (snapshot.data?.status != 'ok') {
+          return Column(
+            children: [
+              Text(
+                snapshot.data!.message!,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              SizedBox(
+                height: height * 0.03,
+              ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.greyColor),
+                  onPressed: () {
+                    ApiManager.getSources();
+                    setState(() {});
+                  },
+                  child: Text(
+                    'Try again',
+                    style: TextStyle(color: AppColors.blackColor),
+                  ))
+            ],
+          );
+        }
+        // todo: server => success
+        var sourcesList = snapshot.data?.sources ?? [];
+        return SourceAppWidget(
+          sourcesList: sourcesList,
+        );
+      },
     );
-
-    // FutureBuilder<SourceResponse?>(
-    //   future: ApiManager.getSources(),
-    //   builder: (context, snapshot) {
-    //     //  loading...
-    //     if (snapshot.connectionState == ConnectionState.waiting) {
-    //       return const Center(
-    //         child: CircularProgressIndicator(
-    //           color: AppColors.greyColor,
-    //         ),
-    //       );
-    //     }
-    //     // error => client
-    //     else if (snapshot.hasError) {
-    //       return Column(
-    //         children: [
-    //           Text(
-    //             'Something went wrong',
-    //             style: Theme.of(context).textTheme.labelMedium,
-    //           ),
-    //           ElevatedButton(
-    //               onPressed: () {
-    //                 ApiManager.getSources();
-    //               },
-    //               child: Text(
-    //                 'Try again',
-    //                 style: Theme.of(context).textTheme.labelMedium,
-    //               ))
-    //         ],
-    //       );
-    //     }
-    //     // todo : server => response => success , error
-    //     // todo : server=>error
-    //     if (snapshot.data?.status != 'ok') {
-    //       return Column(
-    //         children: [
-    //           Text(
-    //             snapshot.data!.message!,
-    //             style: Theme.of(context).textTheme.labelMedium,
-    //           ),
-    //           SizedBox(
-    //             height: height * 0.03,
-    //           ),
-    //           ElevatedButton(
-    //               style: ElevatedButton.styleFrom(
-    //                   backgroundColor: AppColors.greyColor),
-    //               onPressed: () {
-    //                 ApiManager.getSources();
-    //                 setState(() {});
-    //               },
-    //               child: Text(
-    //                 'Try again',
-    //                 style: TextStyle(color: AppColors.blackColor),
-    //               ))
-    //         ],
-    //       );
-    //     }
-    //     // todo: server => success
-    //     var sourcesList = snapshot.data?.sources ?? [];
-    //     return SourceAppWidget(
-    //       sourcesList: sourcesList,
-    //     );
-    //   },
-    // );
   }
 }
